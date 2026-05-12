@@ -1,46 +1,25 @@
 body {
-  margin: 0;
-  font-family: monospace;
   background: #0b0b0b;
-  color: #d0ffd0;
+  color: #bfffd0;
+  font-family: monospace;
+  margin: 0;
+  text-align: center;
 }
 
 .game {
-  max-width: 1000px;
+  max-width: 900px;
   margin: auto;
   padding: 20px;
-}
-
-.header {
-  text-align: center;
-  color: #00ff88;
-}
-
-.screen {
-  margin-top: 20px;
 }
 
 .hidden {
   display: none;
 }
 
-.top {
-  display: flex;
-  gap: 20px;
-}
-
-#stats, #inventory, #room, #actions, #log {
-  background: #111;
-  border: 1px solid #00ff88;
-  padding: 10px;
-  margin-top: 10px;
-  flex: 1;
-}
-
 button {
   background: black;
-  color: #00ff88;
   border: 1px solid #00ff88;
+  color: #00ff88;
   padding: 10px;
   margin: 5px;
   cursor: pointer;
@@ -49,4 +28,11 @@ button {
 button:hover {
   background: #00ff88;
   color: black;
+}
+
+#stats, #inventory, #room, #actions, #log {
+  border: 1px solid #00ff88;
+  margin-top: 10px;
+  padding: 10px;
+  background: #111;
 }
