@@ -1,15 +1,8 @@
 body {
   background: #0b0b0b;
-  color: #bfffd0;
+  color: #c0ffd0;
   font-family: monospace;
-  margin: 0;
   text-align: center;
-}
-
-.game {
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
 }
 
 .hidden {
@@ -20,9 +13,8 @@ button {
   background: black;
   border: 1px solid #00ff88;
   color: #00ff88;
-  padding: 10px;
-  margin: 5px;
-  cursor: pointer;
+  padding: 8px;
+  margin: 4px;
 }
 
 button:hover {
@@ -32,7 +24,6 @@ button:hover {
 
 #stats, #inventory, #room, #actions, #log {
   border: 1px solid #00ff88;
-  margin-top: 10px;
+  margin: 10px;
   padding: 10px;
-  background: #111;
 }
