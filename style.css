@@ -1,28 +1,202 @@
-/* --- Screen Management --- */
+:root {
+
+  --bg: #0f0f0f;
+  --panel: #1b1b1b;
+  --green: #00ff88;
+  --border: #00aa66;
+  --text: #e0ffe0;
+
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: monospace;
+
+}
+
+.game-container {
+
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+
+}
+
+header {
+
+  text-align: center;
+  margin-bottom: 20px;
+
+}
+
+h1 {
+
+  color: var(--green);
+  font-size: 48px;
+
+}
+
+.subtitle {
+
+  color: #999;
+
+}
+
 .screen {
-  transition: opacity 0.3s ease;
+
+  transition: 0.3s;
+
 }
 
 .hidden {
-  display: none !important;
+
+  display: none;
+
 }
 
-/* --- Inventory Layout --- */
-#inventory {
-  background-color: var(--panel-bg);
-  border: 2px solid var(--text-primary);
+.center-box {
+
+  text-align: center;
+  margin-top: 60px;
+
+}
+
+.top-ui {
+
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+
+}
+
+#stats,
+#inventory,
+#room,
+#log-container {
+
+  background: var(--panel);
+  border: 2px solid var(--border);
   padding: 20px;
+  border-radius: 10px;
   margin-top: 20px;
-  border-radius: var(--border-radius);
+
 }
 
-#inventory ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
+#stats,
+#inventory {
+
+  flex: 1;
+  min-width: 300px;
+
 }
 
-#inventory li {
-  padding: 4px 0;
-  border-bottom: 1px dashed var(--text-muted);
+button {
+
+  background: black;
+  color: var(--green);
+  border: 2px solid var(--green);
+  padding: 12px;
+  margin: 5px;
+  cursor: pointer;
+  font-family: monospace;
+  transition: 0.2s;
+  min-height: 50px;
+
+}
+
+button:hover {
+
+  background: var(--green);
+  color: black;
+
+}
+
+.actions {
+
+  margin-top: 20px;
+
+}
+
+#log-container {
+
+  height: 250px;
+  overflow-y: auto;
+
+}
+
+#log p {
+
+  margin: 5px 0;
+
+}
+
+input {
+
+  padding: 12px;
+  background: black;
+  border: 2px solid var(--green);
+  color: var(--green);
+  width: 300px;
+  margin-bottom: 20px;
+
+}
+
+.hp-bar {
+
+  width: 100%;
+  height: 24px;
+  background: #222;
+  border: 2px solid white;
+  margin-top: 10px;
+
+}
+
+.hp-fill {
+
+  height: 100%;
+  background: limegreen;
+  transition: width 0.3s ease;
+
+}
+
+.item {
+
+  margin-bottom: 10px;
+
+}
+
+.bottom-buttons {
+
+  margin-top: 20px;
+
+}
+
+@media (max-width: 768px) {
+
+  .top-ui {
+
+    flex-direction: column;
+
+  }
+
+  .actions {
+
+    display: flex;
+    flex-direction: column;
+
+  }
+
+  button {
+
+    width: 100%;
+
+  }
+
 }
