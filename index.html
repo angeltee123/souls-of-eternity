@@ -3,39 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>No Way Out</title>
-
+  <title>No Way Out | MMO RPG</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
-
-  <meta name="theme-color" content="#000000">
 </head>
 <body>
 
-  <div class="game-container">
+  <main class="game-container">
+    <header>
+      <h1>NO WAY OUT</h1>
+      <p class="subtitle">Multiplayer-Ready RPG</p>
+    </header>
 
-    <h1>NO WAY OUT</h1>
-    <p class="subtitle">Text-Based Dungeon RPG</p>
-    <p class="subtitle">By Angel Tee</p>
+    <!-- SCREEN 1: Start Screen -->
+    <section id="screen-start" class="screen">
+      <div style="text-align: center; margin-top: 50px;">
+        <h2>Welcome to the Dungeon</h2>
+        <button onclick="goToClassSelection()">Start New Game</button>
+      </div>
+    </section>
 
-    <div id="stats"></div>
+    <!-- SCREEN 2: Class Selection -->
+    <section id="screen-class" class="screen hidden">
+      <div style="text-align: center;">
+        <h2>Create Your Character</h2>
+        <input type="text" id="char-name" placeholder="Enter Character Name..." value="Hero" style="padding: 10px; margin-bottom: 20px; font-family: monospace; font-size: 16px; background: #111; color: #00ff88; border: 2px solid #00ff88; border-radius: 8px;">
+        
+        <div class="actions" style="justify-content: center;">
+          <button onclick="startGame('Warrior')">Warrior (High HP)</button>
+          <button onclick="startGame('Mage')">Mage (High DMG)</button>
+          <button onclick="startGame('Rogue')">Rogue (Balanced)</button>
+        </div>
+      </div>
+    </section>
 
-    <div id="room"></div>
+    <!-- SCREEN 3: Main Game UI -->
+    <section id="screen-game" class="screen hidden">
+      <!-- Top Bar: Stats & Inventory -->
+      <div style="display: flex; gap: 20px;">
+        <div id="stats" style="flex: 1;" aria-live="polite"></div>
+        <div id="inventory" style="flex: 1;" aria-live="polite"></div>
+      </div>
 
-    <div id="actions" class="actions"></div>
+      <!-- Map and Combat Area -->
+      <div id="room"></div>
+      <div id="actions" class="actions"></div>
 
-    <div id="log" class="log"></div>
-
-  </div>
+      <!-- Console/Log -->
+      <div id="log-container">
+        <div id="log" class="log"></div>
+      </div>
+    </section>
+  </main>
 
   <script src="game.js"></script>
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./service-worker.js");
-    }
-  </script>
-
 </body>
 </html>
