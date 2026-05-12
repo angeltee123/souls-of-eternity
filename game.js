@@ -133,6 +133,7 @@ class Player {
 
     this.level = 1;
     this.xp = 0;
+    this.xpToNext = 50;
 
     this.maxHp = classes[type].hp;
     this.hp = this.maxHp;
@@ -154,8 +155,7 @@ class Player {
 
   takeDamage(dmg) {
     let def = this.armor ? this.armor.defense : 0;
-    dmg -= def;
-    if (dmg < 0) dmg = 0;
+    dmg = Math.max(0, dmg - def);
 
     this.hp -= dmg;
     if (this.hp < 0) this.hp = 0;
@@ -163,6 +163,28 @@ class Player {
 
   heal(a) {
     this.hp = Math.min(this.maxHp, this.hp + a);
+  }
+
+  gainXP(amount) {
+    this.xp += amount;
+
+    log(`✨ You gained ${amount} XP`);
+
+    while (this.xp >= this.xpToNext) {
+      this.levelUp();
+    }
+  }
+
+  levelUp() {
+    this.level++;
+    this.xp -= this.xpToNext;
+    this.xpToNext = Math.floor(this.xpToNext * 1.4);
+
+    this.maxHp += 20;
+    this.str += 3;
+    this.hp = this.maxHp;
+
+    log(`⬆️ LEVEL UP! You are now level ${this.level}`);
   }
 }
 
@@ -292,10 +314,14 @@ function enemyTurn() {
 
 function win() {
 
-  log("Enemy defeated");
+  const xpGained = 25 + state.player.level * 5;
+
+  log(`💀 Enemy defeated`);
+  log(`✨ You gained ${xpGained} XP`);
 
   state.player.gold += 20;
-  state.player.xp += 30;
+
+  state.player.gainXP(xpGained);
 
   state.inCombat = false;
   state.monster = null;
@@ -358,13 +384,25 @@ function updateUI() {
 
   const p = state.player;
 
+  const xpPercent = Math.floor((p.xp / p.xpToNext) * 100);
+
   document.getElementById("stats").innerHTML = `
-    HP ${p.hp}/${p.maxHp}<br>
-    Level ${p.level}<br>
-    Gold ${p.gold}<br>
-    Weapon: ${p.weapon ? p.weapon.name : "None"}<br>
-    Armor: ${p.armor ? p.armor.name : "None"}
-  `;
+  HP ${p.hp}/${p.maxHp}<br>
+  Level ${p.level}<br>
+  Gold ${p.gold}<br>
+  Weapon: ${p.weapon ? p.weapon.name : "None"}<br>
+  Armor: ${p.armor ? p.armor.name : "None"}<br><br>
+
+  <div style="border:1px solid #00ff88; height:10px;">
+    <div style="
+      width:${xpPercent}%;
+      height:10px;
+      background:#00ff88;
+    "></div>
+  </div>
+
+  <small>XP: ${p.xp} / ${p.xpToNext}</small>
+`;
 
   let inv = "<h3>Inventory</h3>";
 
