@@ -3,90 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SOULS OF ETERNITY</title>
+  <title>Souls of Eternity</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<main class="game-container">
+<main class="game">
 
-  <header>
+  <header class="header">
     <h1>SOULS OF ETERNITY</h1>
-    <p class="subtitle">BY ANGEL TREE</p>
+    <p>RPG Prototype</p>
   </header>
 
-  <!-- START SCREEN -->
-  <section id="screen-start" class="screen">
-    <div class="center-box">
-      <h2>Welcome Adventurer</h2>
-
-      <button onclick="goToClassSelection()">New Game</button>
-      <button onclick="loadGame()">Load Game</button>
-    </div>
+  <!-- START -->
+  <section id="start" class="screen">
+    <button onclick="goToCreate()">Start Game</button>
   </section>
 
-  <!-- CLASS SCREEN -->
-  <section id="screen-class" class="screen hidden">
-
-    <div class="center-box">
-
-      <h2>Create Character</h2>
-
-      <input
-        type="text"
-        id="char-name"
-        placeholder="Character Name"
-        value="Hero"
-      >
-
-      <div class="actions">
-
-        <button onclick="startGame('Warrior')">
-          Warrior
-        </button>
-
-        <button onclick="startGame('Mage')">
-          Mage
-        </button>
-
-        <button onclick="startGame('Rogue')">
-          Rogue
-        </button>
-
-      </div>
-
-    </div>
-
+  <!-- CREATE -->
+  <section id="create" class="screen hidden">
+    <input id="nameInput" placeholder="Name..." />
+    <button onclick="startGame('Warrior')">Warrior</button>
+    <button onclick="startGame('Mage')">Mage</button>
+    <button onclick="startGame('Rogue')">Rogue</button>
   </section>
 
-  <!-- GAME SCREEN -->
-  <section id="screen-game" class="screen hidden">
+  <!-- GAME -->
+  <section id="game" class="screen hidden">
 
-    <div class="top-ui">
-
+    <div class="top">
       <div id="stats"></div>
-
       <div id="inventory"></div>
-
     </div>
 
     <div id="room"></div>
 
-    <div id="actions" class="actions"></div>
+    <div id="actions"></div>
 
-    <div id="log-container">
-      <div id="log"></div>
-    </div>
+    <div id="log"></div>
 
-    <div class="bottom-buttons">
-      <button onclick="saveGame()">Save Game</button>
-    </div>
+    <button onclick="saveGame()">Save</button>
+    <button onclick="loadGame()">Load</button>
 
   </section>
 
 </main>
 
 <script src="game.js"></script>
-
 </body>
 </html>
