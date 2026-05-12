@@ -9,40 +9,33 @@
 
 <body>
 
-<main class="game">
+<h1>SOULS OF ETERNITY</h1>
 
-  <h1>SOULS OF ETERNITY</h1>
+<section id="start">
+  <button onclick="goToCreate()">Start</button>
+  <button onclick="loadGame()">Load</button>
+</section>
 
-  <!-- START -->
-  <section id="start">
-    <button onclick="goToCreate()">Start</button>
-    <button onclick="loadGame()">Load</button>
-  </section>
+<section id="create" class="hidden">
+  <input id="nameInput" placeholder="Name..." />
+  <button onclick="startGame('Warrior')">Warrior</button>
+  <button onclick="startGame('Mage')">Mage</button>
+  <button onclick="startGame('Rogue')">Rogue</button>
+</section>
 
-  <!-- CREATE -->
-  <section id="create" class="hidden">
-    <input id="nameInput" placeholder="Name..." />
-    <button onclick="startGame('Warrior')">Warrior</button>
-    <button onclick="startGame('Mage')">Mage</button>
-    <button onclick="startGame('Rogue')">Rogue</button>
-  </section>
+<section id="game" class="hidden">
 
-  <!-- GAME -->
-  <section id="game" class="hidden">
+  <div id="stats"></div>
+  <div id="inventory"></div>
 
-    <div id="stats"></div>
-    <div id="inventory"></div>
+  <div id="room"></div>
+  <div id="actions"></div>
 
-    <div id="room"></div>
-    <div id="actions"></div>
+  <div id="log"></div>
 
-    <div id="log"></div>
+  <button onclick="saveGame()">Save</button>
 
-    <button onclick="saveGame()">Save</button>
-
-  </section>
-
-</main>
+</section>
 
 <script src="game.js"></script>
 
