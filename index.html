@@ -11,18 +11,16 @@
 
 <main class="game">
 
-  <header class="header">
-    <h1>SOULS OF ETERNITY</h1>
-    <p>RPG Prototype</p>
-  </header>
+  <h1>SOULS OF ETERNITY</h1>
 
   <!-- START -->
-  <section id="start" class="screen">
-    <button onclick="goToCreate()">Start Game</button>
+  <section id="start">
+    <button onclick="goToCreate()">Start</button>
+    <button onclick="loadGame()">Load</button>
   </section>
 
   <!-- CREATE -->
-  <section id="create" class="screen hidden">
+  <section id="create" class="hidden">
     <input id="nameInput" placeholder="Name..." />
     <button onclick="startGame('Warrior')">Warrior</button>
     <button onclick="startGame('Mage')">Mage</button>
@@ -30,26 +28,23 @@
   </section>
 
   <!-- GAME -->
-  <section id="game" class="screen hidden">
+  <section id="game" class="hidden">
 
-    <div class="top">
-      <div id="stats"></div>
-      <div id="inventory"></div>
-    </div>
+    <div id="stats"></div>
+    <div id="inventory"></div>
 
     <div id="room"></div>
-
     <div id="actions"></div>
 
     <div id="log"></div>
 
     <button onclick="saveGame()">Save</button>
-    <button onclick="loadGame()">Load</button>
 
   </section>
 
 </main>
 
 <script src="game.js"></script>
+
 </body>
 </html>
