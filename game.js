@@ -1,6 +1,6 @@
-// ======================
+// =====================
 // STATE
-// ======================
+// =====================
 
 const state = {
   player: null,
@@ -10,9 +10,9 @@ const state = {
 
 const SAVE_KEY = "souls_save";
 
-// ======================
+// =====================
 // CLASSES
-// ======================
+// =====================
 
 const classes = {
   Warrior: { hp: 120, str: 12 },
@@ -20,64 +20,86 @@ const classes = {
   Rogue: { hp: 100, str: 15 }
 };
 
-// ======================
+// =====================
 // WORLD (6 AREAS)
-// ======================
+// =====================
 
 const world = {
 
   town: {
     name: "Town",
     type: "safe",
+    desc: "Starting town",
     exits: ["forest", "shop"]
   },
 
   shop: {
     name: "Merchant Shop",
     type: "safe",
+    desc: "Buy and sell items",
     exits: ["town"]
   },
 
   forest: {
     name: "Forest",
     type: "danger",
+    desc: "Weak monsters",
     exits: ["town", "graveyard", "catacombs"]
   },
 
   graveyard: {
     name: "Graveyard",
     type: "danger",
+    desc: "Undead roam here",
     exits: ["forest", "tower"]
   },
 
   catacombs: {
     name: "Catacombs",
-    type: "bosspath",
-    exits: ["forest", "boss_catacombs"]
+    type: "dungeon",
+    desc: "Dangerous underground path",
+    exits: ["forest", "cat2"]
+  },
+
+  cat2: {
+    name: "Catacomb Depth 2",
+    type: "dungeon_locked",
+    desc: "No easy escape ahead",
+    exits: ["cat3"]
+  },
+
+  cat3: {
+    name: "Catacomb Depth 3",
+    type: "dungeon_locked",
+    desc: "Final descent",
+    exits: ["boss_cat"]
+  },
+
+  boss_cat: {
+    name: "Catacomb Boss",
+    type: "boss",
+    desc: "A terrifying undead lord",
+    exits: []
   },
 
   tower: {
-    name: "Tower",
+    name: "Arcane Tower",
     type: "danger",
+    desc: "Mage enemies inside",
     exits: ["graveyard", "boss_tower"]
-  },
-
-  boss_catacombs: {
-    name: "Catacomb Boss",
-    type: "boss",
-    exits: ["catacombs"]
   },
 
   boss_tower: {
     name: "Tower Boss",
     type: "boss",
-    exits: ["tower"]
+    desc: "Arcane King awaits",
+    exits: []
   }
 };
 
-// ======================
+// =====================
 // SHOP ITEMS
-// ======================
+// =====================
 
 const shopItems = [
   { id: "potion", name: "Potion", type: "consumable", price: 20, heal: 40 },
@@ -85,21 +107,24 @@ const shopItems = [
   { id: "armor", name: "Leather Armor", type: "armor", price: 50, defense: 3 }
 ];
 
-// ======================
+// =====================
 // MONSTERS
-// ======================
+// =====================
 
 const monsters = [
   { name: "Goblin", hp: 40, atk: 6 },
   { name: "Skeleton", hp: 60, atk: 10 },
   { name: "Slime", hp: 30, atk: 4 },
+  { name: "Bone Horror", hp: 80, atk: 12 },
+  { name: "Wraith", hp: 90, atk: 14 },
+  { name: "Mage Sentinel", hp: 100, atk: 16 },
   { name: "Catacomb Lord", hp: 200, atk: 18 },
   { name: "Arcane King", hp: 220, atk: 20 }
 ];
 
-// ======================
+// =====================
 // PLAYER
-// ======================
+// =====================
 
 class Player {
   constructor(name, type) {
@@ -119,9 +144,7 @@ class Player {
     this.weapon = null;
     this.armor = null;
 
-    this.inventory = [
-      { id: "potion", qty: 2 }
-    ];
+    this.inventory = [{ id: "potion", qty: 2 }];
   }
 
   damage() {
@@ -138,14 +161,14 @@ class Player {
     if (this.hp < 0) this.hp = 0;
   }
 
-  heal(amount) {
-    this.hp = Math.min(this.maxHp, this.hp + amount);
+  heal(a) {
+    this.hp = Math.min(this.maxHp, this.hp + a);
   }
 }
 
-// ======================
+// =====================
 // NAVIGATION
-// ======================
+// =====================
 
 function goToCreate() {
   show("create");
@@ -161,20 +184,27 @@ function startGame(type) {
   updateUI();
 }
 
-// ======================
+// =====================
 // ROOMS
-// ======================
+// =====================
 
 function enterRoom(id) {
+
+  // CATACOMB LOCK RULE
+  if (state.player.location === "cat2" && id === "forest") {
+    log("Path collapsed.");
+    return;
+  }
 
   state.player.location = id;
 
   const room = world[id];
 
-  let html = `<h2>${room.name}</h2>`;
+  let html = `<h2>${room.name}</h2><p>${room.desc}</p>`;
 
   if (room.type === "safe") {
     html += `<button onclick="rest()">Rest</button>`;
+    if (id === "shop") html += renderShop();
   }
 
   if (room.type === "danger") {
@@ -182,7 +212,7 @@ function enterRoom(id) {
   }
 
   if (room.type === "boss") {
-    html += `<button onclick="startBossFight()">Boss Fight</button>`;
+    html += `<button onclick="startBossFight()">Boss</button>`;
   }
 
   room.exits.forEach(e => {
@@ -193,17 +223,17 @@ function enterRoom(id) {
   updateUI();
 }
 
-// ======================
+// =====================
 // COMBAT
-// ======================
+// =====================
 
 function startFight() {
 
-  const zone = state.player.location;
+  const list = ["Goblin", "Skeleton", "Slime"];
 
-  const list = monsters.filter(m => m.name === "Goblin" || m.name === "Skeleton");
+  const name = list[Math.floor(Math.random() * list.length)];
 
-  const base = list[Math.floor(Math.random() * list.length)];
+  const base = monsters.find(m => m.name === name);
 
   state.monster = {
     ...base,
@@ -221,7 +251,7 @@ function attack() {
 
   state.monster.hp -= dmg;
 
-  log("You hit for " + dmg);
+  log("Hit " + dmg);
 
   if (state.monster.hp <= 0) {
     win();
@@ -233,20 +263,18 @@ function attack() {
 }
 
 function enemyTurn() {
+
   let dmg = state.monster.atk;
 
   state.player.takeDamage(dmg);
 
-  log("Enemy hits for " + dmg);
-
-  if (state.player.hp <= 0) {
-    log("YOU DIED");
-  }
+  log("Enemy hits " + dmg);
 
   updateUI();
 }
 
 function win() {
+
   log("Enemy defeated");
 
   state.player.gold += 20;
@@ -259,61 +287,56 @@ function win() {
 }
 
 function renderFight() {
-  document.getElementById("room").innerHTML = `
-    <h2>${state.monster.name}</h2>
-    <p>HP: ${state.monster.hp}</p>
-  `;
+  document.getElementById("room").innerHTML =
+    `<h2>${state.monster.name}</h2><p>HP ${state.monster.hp}</p>`;
 
-  document.getElementById("actions").innerHTML = `
-    <button onclick="attack()">Attack</button>
-  `;
+  document.getElementById("actions").innerHTML =
+    `<button onclick="attack()">Attack</button>`;
 }
 
-// ======================
+// =====================
 // SHOP
-// ======================
+// =====================
 
-function buyItem(id) {
+function renderShop() {
+  let html = "<h3>Shop</h3>";
 
-  let item = shopItems.find(i => i.id === id);
+  shopItems.forEach(i => {
+    html += `
+      <p>${i.name} (${i.price})</p>
+      <button onclick="buy('${i.id}')">Buy</button>
+    `;
+  });
+
+  return html;
+}
+
+function buy(id) {
+
+  const item = shopItems.find(i => i.id === id);
 
   if (state.player.gold < item.price) return;
 
   state.player.gold -= item.price;
 
-  if (item.type === "weapon") {
-    state.player.weapon = item;
-  }
-
-  if (item.type === "armor") {
-    state.player.armor = item;
-  }
-
-  if (item.type === "consumable") {
-    let inv = state.player.inventory.find(i => i.id === id);
-
-    if (inv) inv.qty++;
-    else state.player.inventory.push({ id, qty: 1 });
-  }
+  if (item.type === "weapon") state.player.weapon = item;
+  if (item.type === "armor") state.player.armor = item;
 
   updateUI();
 }
 
-// ======================
+// =====================
 // UI
-// ======================
+// =====================
 
 function updateUI() {
 
   const p = state.player;
 
   document.getElementById("stats").innerHTML = `
-    <h3>${p.name}</h3>
-    HP: ${p.hp}/${p.maxHp}<br>
-    Level: ${p.level}<br>
-    Gold: ${p.gold}<br>
-    Weapon: ${p.weapon ? p.weapon.name : "None"}<br>
-    Armor: ${p.armor ? p.armor.name : "None"}
+    HP ${p.hp}/${p.maxHp}
+    Level ${p.level}
+    Gold ${p.gold}
   `;
 
   let inv = "<h3>Inventory</h3>";
@@ -325,13 +348,13 @@ function updateUI() {
   document.getElementById("inventory").innerHTML = inv;
 }
 
-function log(msg) {
-  document.getElementById("log").innerHTML += `<p>${msg}</p>`;
+function log(t) {
+  document.getElementById("log").innerHTML += `<p>${t}</p>`;
 }
 
-// ======================
+// =====================
 // SAVE
-// ======================
+// =====================
 
 function saveGame() {
   localStorage.setItem(SAVE_KEY, JSON.stringify(state.player));
@@ -345,9 +368,9 @@ function loadGame() {
   enterRoom(state.player.location);
 }
 
-// ======================
+// =====================
 // HELPERS
-// ======================
+// =====================
 
 function show(id) {
   document.querySelectorAll("section")
