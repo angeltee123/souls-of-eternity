@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>No Way Out</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+
+  <meta name="theme-color" content="#000000">
+</head>
+<body>
+
+  <div class="game-container">
+
+    <h1>NO WAY OUT</h1>
+    <p class="subtitle">Text-Based Dungeon RPG</p>
+
+    <div id="stats"></div>
+
+    <div id="room"></div>
+
+    <div id="actions" class="actions"></div>
+
+    <div id="log" class="log"></div>
+
+  </div>
+
+  <script src="game.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js");
+    }
+  </script>
+
+</body>
+</html>
