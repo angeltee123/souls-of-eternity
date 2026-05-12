@@ -1,4 +1,4 @@
-const CACHE_NAME = "no-way-out-v1";
+const CACHE_NAME = "souls-of-eternity-v1";
 
 const urlsToCache = [
   "./",
