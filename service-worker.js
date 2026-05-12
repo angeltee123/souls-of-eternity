@@ -14,7 +14,7 @@ self.addEventListener("install", event => {
 
     caches.open(CACHE_NAME)
       .then(cache => {
-        return cache.addAll(urlsToCache);
+        return cache.addAll(["./",'.img/icon-192.png']);
       })
   );
 });
