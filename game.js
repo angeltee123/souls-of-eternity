@@ -1,809 +1,298 @@
-const SAVE_KEY = "noWayOutSave";
+// ======================
+// GAME STATE
+// ======================
 
-const classStats = {
-
-  Warrior: { hp: 140, strength: 12 },
-  Mage: { hp: 90, strength: 20 },
-  Rogue: { hp: 110, strength: 16 }
-
+const state = {
+  player: null,
+  monster: null,
+  inCombat: false
 };
 
-const skills = {
+// ======================
+// DATA
+// ======================
 
-  Warrior: [
-    {
-      name: "Power Strike",
-      damage: 35
-    }
-  ],
-
-  Mage: [
-    {
-      name: "Fireball",
-      damage: 45
-    }
-  ],
-
-  Rogue: [
-    {
-      name: "Backstab",
-      damage: 40
-    }
-  ]
-
+const classes = {
+  Warrior: { hp: 120, str: 12 },
+  Mage: { hp: 80, str: 20 },
+  Rogue: { hp: 100, str: 15 }
 };
 
-const monsterTemplates = [
-
-  {
-    name: "Goblin",
-    hp: 40,
-    attack: 6
-  },
-
-  {
-    name: "Skeleton",
-    hp: 60,
-    attack: 10
-  },
-
-  {
-    name: "Slime",
-    hp: 25,
-    attack: 4
-  },
-
-  {
-    name: "Dungeon Lord",
-    hp: 250,
-    attack: 20,
-    boss: true
-  }
-
+const monsters = [
+  { name: "Goblin", hp: 40, atk: 6 },
+  { name: "Skeleton", hp: 60, atk: 10 },
+  { name: "Slime", hp: 30, atk: 4 }
 ];
 
-const worldMap = {
-
+const world = {
   town: {
-    name: "Safe Haven",
-    desc: "A peaceful town.",
-    exits: ["forest", "shop"],
-    monsters: []
+    name: "Town",
+    desc: "Safe area.",
+    enemies: []
   },
-
   forest: {
-    name: "Whispering Forest",
-    desc: "Dark trees surround you.",
-    exits: ["town", "dungeon0"],
-    monsters: ["Goblin", "Slime"]
-  },
-
-  shop: {
-    name: "Merchant Shop",
-    desc: "Buy useful items.",
-    exits: ["town"],
-    monsters: []
+    name: "Forest",
+    desc: "Danger ahead.",
+    enemies: ["Goblin", "Slime"]
   }
-
 };
 
-function generateDungeon() {
-
-  for (let i = 0; i < 5; i++) {
-
-    worldMap[`dungeon${i}`] = {
-
-      name: `Dungeon Room ${i}`,
-      desc: "A dangerous dungeon chamber.",
-      exits: [],
-      monsters: ["Goblin", "Skeleton"]
-
-    };
-
-  }
-
-  for (let i = 0; i < 4; i++) {
-
-    worldMap[`dungeon${i}`]
-      .exits.push(`dungeon${i + 1}`);
-
-  }
-
-  worldMap["dungeon4"].monsters = ["Dungeon Lord"];
-
-}
-
-generateDungeon();
+// ======================
+// PLAYER CLASS
+// ======================
 
 class Player {
-
-  constructor(name, playerClass) {
-
+  constructor(name, type) {
     this.name = name;
-    this.playerClass = playerClass;
-
+    this.type = type;
     this.level = 1;
     this.xp = 0;
-    this.gold = 50;
 
-    this.maxHp = classStats[playerClass].hp;
+    this.maxHp = classes[type].hp;
     this.hp = this.maxHp;
+    this.str = classes[type].str;
 
-    this.strength = classStats[playerClass].strength;
+    this.gold = 0;
+    this.inventory = [{ name: "Potion", heal: 30, qty: 2 }];
 
     this.location = "town";
-
-    this.weapon = null;
-    this.armor = null;
-
-    this.skills = skills[playerClass];
-
-    this.inventory = [
-
-      {
-        name: "Health Potion",
-        heal: 40,
-        quantity: 2
-      }
-
-    ];
-
   }
 
-  attackDamage() {
-
-    let weaponBonus =
-      this.weapon ? this.weapon.damage : 0;
-
-    return (
-      Math.floor(Math.random() * 6)
-      + this.strength
-      + weaponBonus
-    );
-
+  damage() {
+    return Math.floor(Math.random() * 6) + this.str;
   }
 
-  takeDamage(amount) {
-
-    let armor =
-      this.armor ? this.armor.defense : 0;
-
-    amount -= armor;
-
-    if (amount < 0) amount = 0;
-
-    this.hp -= amount;
-
+  takeDamage(dmg) {
+    this.hp -= dmg;
     if (this.hp < 0) this.hp = 0;
-
   }
 
   heal(amount) {
-
     this.hp += amount;
-
-    if (this.hp > this.maxHp) {
-      this.hp = this.maxHp;
-    }
-
+    if (this.hp > this.maxHp) this.hp = this.maxHp;
   }
 
-  gainXp(amount) {
-
+  xpGain(amount) {
     this.xp += amount;
 
-    while (this.xp >= this.level * 50) {
-      this.levelUp();
+    if (this.xp >= this.level * 50) {
+      this.level++;
+      this.maxHp += 20;
+      this.str += 2;
+      this.hp = this.maxHp;
+      log("LEVEL UP!");
     }
-
   }
-
-  levelUp() {
-
-    this.level++;
-
-    this.maxHp += 20;
-    this.hp = this.maxHp;
-
-    this.strength += 3;
-
-    log(`✨ LEVEL UP! Level ${this.level}`);
-
-  }
-
 }
 
-class Monster {
+// ======================
+// NAVIGATION
+// ======================
 
-  constructor(data) {
-
-    this.name = data.name;
-    this.hp = data.hp;
-    this.maxHp = data.hp;
-    this.attack = data.attack;
-    this.boss = data.boss || false;
-
-  }
-
+function goToCreate() {
+  show("create");
 }
 
-let player = null;
-let currentMonster = null;
+function startGame(type) {
+  const name = document.getElementById("nameInput").value || "Hero";
 
-const UI = {
+  state.player = new Player(name, type);
 
-  screenStart:
-    document.getElementById("screen-start"),
+  show("game");
 
-  screenClass:
-    document.getElementById("screen-class"),
-
-  screenGame:
-    document.getElementById("screen-game"),
-
-  stats:
-    document.getElementById("stats"),
-
-  inventory:
-    document.getElementById("inventory"),
-
-  room:
-    document.getElementById("room"),
-
-  actions:
-    document.getElementById("actions"),
-
-  log:
-    document.getElementById("log")
-
-};
-
-function goToClassSelection() {
-
-  UI.screenStart.classList.add("hidden");
-
-  UI.screenClass.classList.remove("hidden");
-
-}
-
-function startGame(selectedClass) {
-
-  const name =
-    document.getElementById("char-name").value
-    || "Hero";
-
-  player = new Player(name, selectedClass);
-
-  UI.screenClass.classList.add("hidden");
-
-  UI.screenGame.classList.remove("hidden");
-
-  log(`Welcome ${player.name}!`);
-
+  enterRoom("town");
   updateUI();
-
-  enterRoom(player.location);
-
 }
 
-function saveGame() {
+// ======================
+// ROOM SYSTEM
+// ======================
 
-  localStorage.setItem(
-    SAVE_KEY,
-    JSON.stringify(player)
-  );
+function enterRoom(id) {
+  state.player.location = id;
 
-  log("💾 Game Saved");
+  const room = world[id];
 
-}
-
-function loadGame() {
-
-  const save =
-    localStorage.getItem(SAVE_KEY);
-
-  if (!save) {
-
-    alert("No save found.");
-
-    return;
-
-  }
-
-  const data = JSON.parse(save);
-
-  player = Object.assign(
-    new Player(data.name, data.playerClass),
-    data
-  );
-
-  UI.screenStart.classList.add("hidden");
-
-  UI.screenGame.classList.remove("hidden");
-
-  updateUI();
-
-  enterRoom(player.location);
-
-  log("📂 Save Loaded");
-
-}
-
-function log(text) {
-
-  const p = document.createElement("p");
-
-  p.textContent = `> ${text}`;
-
-  UI.log.appendChild(p);
-
-  UI.log.scrollTop =
-    UI.log.scrollHeight;
-
-}
-
-function updateUI() {
-
-  UI.stats.innerHTML = `
-
-    <h2>${player.name}</h2>
-
-    <p>
-      ${player.playerClass}
-      Lv.${player.level}
-    </p>
-
-    <p>
-      HP:
-      ${player.hp}/${player.maxHp}
-    </p>
-
-    <div class="hp-bar">
-      <div
-        class="hp-fill"
-        style="
-          width:
-          ${(player.hp/player.maxHp)*100}%
-        "
-      ></div>
-    </div>
-
-    <p>Gold: ${player.gold}</p>
-
-    <p>
-      XP:
-      ${player.xp}/${player.level * 50}
-    </p>
-
-  `;
-
-  let inventoryHTML =
-    `<h2>Inventory</h2>`;
-
-  player.inventory.forEach((item, index) => {
-
-    inventoryHTML += `
-
-      <div class="item">
-
-        ${item.name}
-        x${item.quantity}
-
-        <button
-          onclick="useItem(${index})"
-        >
-          Use
-        </button>
-
-      </div>
-
-    `;
-
-  });
-
-  UI.inventory.innerHTML = inventoryHTML;
-
-}
-
-function enterRoom(roomId) {
-
-  player.location = roomId;
-
-  currentMonster = null;
-
-  const room = worldMap[roomId];
-
-  UI.room.innerHTML = `
-
+  document.getElementById("room").innerHTML = `
     <h2>${room.name}</h2>
-
     <p>${room.desc}</p>
-
   `;
 
   let html = "";
 
-  if (room.monsters.length > 0) {
-
-    html += `
-      <button onclick="huntMonster()">
-        Hunt Monsters
-      </button>
-    `;
-
+  if (room.enemies.length > 0) {
+    html += `<button onclick="startFight()">Fight</button>`;
   } else {
-
-    html += `
-      <button onclick="rest()">
-        Rest
-      </button>
-    `;
-
+    html += `<button onclick="rest()">Rest</button>`;
   }
 
-  room.exits.forEach(exit => {
+  html += `<button onclick="enterRoom('town')">Town</button>`;
+  html += `<button onclick="enterRoom('forest')">Forest</button>`;
 
-    html += `
-      <button onclick="enterRoom('${exit}')">
-        Go To ${worldMap[exit].name}
-      </button>
-    `;
-
-  });
-
-  if (roomId === "shop") {
-
-    html += `
-      <button onclick="buyPotion()">
-        Buy Potion (20G)
-      </button>
-
-      <button onclick="buySword()">
-        Buy Sword (50G)
-      </button>
-    `;
-
-  }
-
-  UI.actions.innerHTML = html;
-
-}
-
-function rest() {
-
-  player.hp = player.maxHp;
-
-  log("You rested.");
+  document.getElementById("actions").innerHTML = html;
 
   updateUI();
-
 }
 
-function huntMonster() {
+// ======================
+// COMBAT
+// ======================
 
-  const room =
-    worldMap[player.location];
+function startFight() {
+  const room = world[state.player.location];
 
-  const randomMonster =
-    room.monsters[
-      Math.floor(
-        Math.random()
-        * room.monsters.length
-      )
+  const enemyName =
+    room.enemies[
+      Math.floor(Math.random() * room.enemies.length)
     ];
 
-  const template =
-    monsterTemplates.find(
-      m => m.name === randomMonster
-    );
+  const base = monsters.find(m => m.name === enemyName);
 
-  currentMonster = new Monster({
+  state.monster = {
+    ...base,
+    hp: base.hp + state.player.level * 10
+  };
 
-    ...template,
+  state.inCombat = true;
 
-    hp:
-      template.hp
-      + player.level * 10,
-
-    attack:
-      template.attack
-      + player.level * 2
-
-  });
-
-  renderBattle();
-
-  log(`A ${currentMonster.name} appeared!`);
-
-}
-
-function renderBattle() {
-
-  UI.room.innerHTML = `
-
-    <h2>${currentMonster.name}</h2>
-
-    <p>
-      HP:
-      ${currentMonster.hp}
-      /
-      ${currentMonster.maxHp}
-    </p>
-
-    <div class="hp-bar">
-      <div
-        class="hp-fill"
-        style="
-          width:
-          ${(currentMonster.hp/currentMonster.maxHp)*100}%
-        "
-      ></div>
-    </div>
-
-  `;
-
-  UI.actions.innerHTML = `
-
-    <button onclick="attack()">
-      Attack
-    </button>
-
-    <button onclick="useSkill()">
-      Skill
-    </button>
-
-    <button onclick="flee()">
-      Flee
-    </button>
-
-  `;
-
+  renderFight();
 }
 
 function attack() {
+  if (!state.inCombat) return;
 
-  const damage =
-    player.attackDamage();
+  const pDmg = state.player.damage();
 
-  currentMonster.hp -= damage;
+  state.monster.hp -= pDmg;
 
-  if (currentMonster.hp < 0) {
-    currentMonster.hp = 0;
-  }
+  log(`You hit for ${pDmg}`);
 
-  log(`You hit for ${damage}`);
-
-  if (currentMonster.hp <= 0) {
-
-    victory();
-
+  if (state.monster.hp <= 0) {
+    win();
     return;
-
   }
 
-  monsterTurn();
+  enemyTurn();
 
-  renderBattle();
-
+  renderFight();
 }
 
-function useSkill() {
+function enemyTurn() {
+  const dmg = state.monster.atk;
 
-  const skill =
-    player.skills[0];
+  state.player.takeDamage(dmg);
 
-  currentMonster.hp -= skill.damage;
+  log(`Enemy hits for ${dmg}`);
 
-  log(
-    `🔥 ${skill.name}
-    dealt ${skill.damage}`
-  );
-
-  if (currentMonster.hp <= 0) {
-
-    victory();
-
-    return;
-
-  }
-
-  monsterTurn();
-
-  renderBattle();
-
-}
-
-function monsterTurn() {
-
-  if (currentMonster.boss) {
-
-    bossTurn();
-
-    return;
-
-  }
-
-  player.takeDamage(
-    currentMonster.attack
-  );
-
-  log(
-    `${currentMonster.name}
-    hits for
-    ${currentMonster.attack}`
-  );
-
-  if (player.hp <= 0) {
-
-    death();
-
+  if (state.player.hp <= 0) {
+    log("YOU DIED");
   }
 
   updateUI();
-
 }
 
-function bossTurn() {
+function win() {
+  log("Enemy defeated!");
 
-  const move = Math.random();
+  state.player.gold += 10;
+  state.player.xpGain(20);
 
-  if (move < 0.3) {
+  state.inCombat = false;
+  state.monster = null;
 
-    let damage =
-      currentMonster.attack * 2;
-
-    player.takeDamage(damage);
-
-    log("💥 CRUSHING SLAM!");
-
-  } else {
-
-    player.takeDamage(
-      currentMonster.attack
-    );
-
-    log("Boss attacks!");
-
-  }
-
-  if (player.hp <= 0) {
-    death();
-  }
-
-  updateUI();
-
+  enterRoom(state.player.location);
 }
 
-function victory() {
-
-  log(
-    `Defeated ${currentMonster.name}`
-  );
-
-  player.gold += 20;
-
-  player.gainXp(30);
-
-  if (Math.random() < 0.3) {
-
-    let potion =
-      player.inventory.find(
-        i => i.name === "Health Potion"
-      );
-
-    if (potion) {
-
-      potion.quantity++;
-
-    }
-
-  }
-
-  currentMonster = null;
-
-  updateUI();
-
-  enterRoom(player.location);
-
-}
-
-function death() {
-
-  log("💀 YOU DIED");
-
-  UI.actions.innerHTML = `
-    <button onclick="location.reload()">
-      Restart
-    </button>
+function renderFight() {
+  document.getElementById("room").innerHTML = `
+    <h2>${state.monster.name}</h2>
+    <p>HP: ${state.monster.hp}</p>
   `;
 
+  document.getElementById("actions").innerHTML = `
+    <button onclick="attack()">Attack</button>
+  `;
 }
 
-function flee() {
+// ======================
+// INVENTORY
+// ======================
 
-  log("You fled.");
+function useItem(i) {
+  const item = state.player.inventory[i];
 
-  enterRoom("town");
+  if (item.name === "Potion") {
+    state.player.heal(item.heal);
+    item.qty--;
 
-}
-
-function useItem(index) {
-
-  const item =
-    player.inventory[index];
-
-  if (item.name === "Health Potion") {
-
-    player.heal(item.heal);
-
-    item.quantity--;
-
-    log(
-      `Recovered ${item.heal} HP`
-    );
-
-    if (item.quantity <= 0) {
-
-      player.inventory.splice(index, 1);
-
+    if (item.qty <= 0) {
+      state.player.inventory.splice(i, 1);
     }
 
+    log("Healed");
   }
 
   updateUI();
-
 }
 
-function buyPotion() {
+// ======================
+// UI
+// ======================
 
-  if (player.gold < 20) {
+function updateUI() {
+  const p = state.player;
+  if (!p) return;
 
-    log("Not enough gold.");
+  document.getElementById("stats").innerHTML = `
+    <h3>${p.name}</h3>
+    <p>HP: ${p.hp}/${p.maxHp}</p>
+    <p>Level: ${p.level}</p>
+    <p>Gold: ${p.gold}</p>
+  `;
 
-    return;
+  let inv = "<h3>Inventory</h3>";
 
-  }
+  p.inventory.forEach((i, idx) => {
+    inv += `
+      <p>
+        ${i.name} x${i.qty}
+        <button onclick="useItem(${idx})">Use</button>
+      </p>
+    `;
+  });
 
-  player.gold -= 20;
-
-  let potion =
-    player.inventory.find(
-      i => i.name === "Health Potion"
-    );
-
-  if (potion) {
-
-    potion.quantity++;
-
-  }
-
-  updateUI();
-
-  log("Bought potion.");
-
+  document.getElementById("inventory").innerHTML = inv;
 }
 
-function buySword() {
+function log(msg) {
+  document.getElementById("log").innerHTML += `<p>${msg}</p>`;
+}
 
-  if (player.gold < 50) {
+// ======================
+// SAVE SYSTEM
+// ======================
 
-    log("Not enough gold.");
+function saveGame() {
+  localStorage.setItem("save", JSON.stringify(state.player));
+  log("Saved");
+}
 
-    return;
+function loadGame() {
+  const data = JSON.parse(localStorage.getItem("save"));
 
-  }
+  state.player = Object.assign(new Player(), data);
 
-  player.gold -= 50;
+  show("game");
+  enterRoom(state.player.location);
+}
 
-  player.weapon = {
+// ======================
+// HELPERS
+// ======================
 
-    name: "Iron Sword",
-    damage: 5
+function show(id) {
+  document.querySelectorAll(".screen")
+    .forEach(s => s.classList.add("hidden"));
 
-  };
-
-  log("Equipped Iron Sword");
-
-  updateUI();
-
+  document.getElementById(id).classList.remove("hidden");
 }
