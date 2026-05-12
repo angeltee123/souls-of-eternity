@@ -3,58 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>No Way Out | MMO RPG</title>
+  <title>No Way Out</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <main class="game-container">
-    <header>
-      <h1>NO WAY OUT</h1>
-      <p class="subtitle">Multiplayer-Ready RPG</p>
-    </header>
+<main class="game-container">
 
-    <!-- SCREEN 1: Start Screen -->
-    <section id="screen-start" class="screen">
-      <div style="text-align: center; margin-top: 50px;">
-        <h2>Welcome to the Dungeon</h2>
-        <button onclick="goToClassSelection()">Start New Game</button>
+  <header>
+    <h1>SOULS OF ETERNITY</h1>
+    <p class="subtitle">BY ANGEL TREE</p>
+  </header>
+
+  <!-- START SCREEN -->
+  <section id="screen-start" class="screen">
+    <div class="center-box">
+      <h2>Welcome Adventurer</h2>
+
+      <button onclick="goToClassSelection()">New Game</button>
+      <button onclick="loadGame()">Load Game</button>
+    </div>
+  </section>
+
+  <!-- CLASS SCREEN -->
+  <section id="screen-class" class="screen hidden">
+
+    <div class="center-box">
+
+      <h2>Create Character</h2>
+
+      <input
+        type="text"
+        id="char-name"
+        placeholder="Character Name"
+        value="Hero"
+      >
+
+      <div class="actions">
+
+        <button onclick="startGame('Warrior')">
+          Warrior
+        </button>
+
+        <button onclick="startGame('Mage')">
+          Mage
+        </button>
+
+        <button onclick="startGame('Rogue')">
+          Rogue
+        </button>
+
       </div>
-    </section>
 
-    <!-- SCREEN 2: Class Selection -->
-    <section id="screen-class" class="screen hidden">
-      <div style="text-align: center;">
-        <h2>Create Your Character</h2>
-        <input type="text" id="char-name" placeholder="Enter Character Name..." value="Hero" style="padding: 10px; margin-bottom: 20px; font-family: monospace; font-size: 16px; background: #111; color: #00ff88; border: 2px solid #00ff88; border-radius: 8px;">
-        
-        <div class="actions" style="justify-content: center;">
-          <button onclick="startGame('Warrior')">Warrior (High HP)</button>
-          <button onclick="startGame('Mage')">Mage (High DMG)</button>
-          <button onclick="startGame('Rogue')">Rogue (Balanced)</button>
-        </div>
-      </div>
-    </section>
+    </div>
 
-    <!-- SCREEN 3: Main Game UI -->
-    <section id="screen-game" class="screen hidden">
-      <!-- Top Bar: Stats & Inventory -->
-      <div style="display: flex; gap: 20px;">
-        <div id="stats" style="flex: 1;" aria-live="polite"></div>
-        <div id="inventory" style="flex: 1;" aria-live="polite"></div>
-      </div>
+  </section>
 
-      <!-- Map and Combat Area -->
-      <div id="room"></div>
-      <div id="actions" class="actions"></div>
+  <!-- GAME SCREEN -->
+  <section id="screen-game" class="screen hidden">
 
-      <!-- Console/Log -->
-      <div id="log-container">
-        <div id="log" class="log"></div>
-      </div>
-    </section>
-  </main>
+    <div class="top-ui">
 
-  <script src="game.js"></script>
+      <div id="stats"></div>
+
+      <div id="inventory"></div>
+
+    </div>
+
+    <div id="room"></div>
+
+    <div id="actions" class="actions"></div>
+
+    <div id="log-container">
+      <div id="log"></div>
+    </div>
+
+    <div class="bottom-buttons">
+      <button onclick="saveGame()">Save Game</button>
+    </div>
+
+  </section>
+
+</main>
+
+<script src="game.js"></script>
+
 </body>
 </html>
