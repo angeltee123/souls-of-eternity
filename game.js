@@ -21,7 +21,7 @@ const classes = {
 };
 
 // =====================
-// WORLD (6 AREAS)
+// WORLD (ALL ZONES FIXED)
 // =====================
 
 const world = {
@@ -29,70 +29,70 @@ const world = {
   town: {
     name: "Town",
     type: "safe",
-    desc: "Starting town",
+    desc: "Starting town.",
     exits: ["forest", "shop"]
   },
 
   shop: {
     name: "Merchant Shop",
     type: "safe",
-    desc: "Buy and sell items",
+    desc: "Buy and sell items.",
     exits: ["town"]
   },
 
   forest: {
     name: "Forest",
     type: "danger",
-    desc: "Weak monsters",
+    desc: "Weak monsters roam here.",
     exits: ["town", "graveyard", "catacombs"]
   },
 
   graveyard: {
     name: "Graveyard",
     type: "danger",
-    desc: "Undead roam here",
+    desc: "Undead rise from graves.",
     exits: ["forest", "tower"]
   },
 
   catacombs: {
     name: "Catacombs",
-    type: "dungeon",
-    desc: "Dangerous underground path",
+    type: "danger",
+    desc: "Dangerous underground maze.",
     exits: ["forest", "cat2"]
   },
 
   cat2: {
     name: "Catacomb Depth 2",
-    type: "dungeon_locked",
-    desc: "No easy escape ahead",
+    type: "danger",
+    desc: "No easy return ahead.",
     exits: ["cat3"]
   },
 
   cat3: {
     name: "Catacomb Depth 3",
-    type: "dungeon_locked",
-    desc: "Final descent",
+    type: "danger",
+    desc: "Final descent.",
     exits: ["boss_cat"]
   },
 
   boss_cat: {
     name: "Catacomb Boss",
     type: "boss",
-    desc: "A terrifying undead lord",
+    desc: "The Rot Lord awakens.",
     exits: []
   },
 
   tower: {
     name: "Arcane Tower",
     type: "danger",
-    desc: "Mage enemies inside",
+    desc: "Mage-infested tower.",
     exits: ["graveyard", "boss_tower"]
   },
 
   boss_tower: {
     name: "Tower Boss",
     type: "boss",
-    desc: "Arcane King awaits",
+    desc: "Arcane King awaits.",
     exits: []
   }
 };
@@ -185,12 +185,51 @@ function startGame(type) {
 }
 
 // =====================
-// ROOMS
+// ⭐ FIX: SINGLE ROOM RENDER SYSTEM
+// =====================
+
+function renderRoom() {
+
+  const room = world[state.player.location];
+
+  let html = `
+    <h2>${room.name}</h2>
+    <p>${room.desc}</p>
+  `;
+
+  if (room.type === "safe") {
+    html += `<button onclick="rest()">Rest</button>`;
+    if (state.player.location === "shop") html += renderShop();
+  }
+
+  if (room.type === "danger") {
+    html += `<button onclick="startFight()">Explore</button>`;
+  }
+
+  if (room.type === "boss") {
+    html += `<button onclick="startBossFight()">Boss Fight</button>`;
+  }
+
+  html += `<hr><h4>Travel</h4>`;
+
+  room.exits.forEach(e => {
+    html += `
+      <button onclick="enterRoom('${e}')">
+        ${world[e].name}
+      </button>
+    `;
+  });
+
+  document.getElementById("room").innerHTML = html;
+}
+
+// =====================
+// ROOM ENTRY
 // =====================
 
 function enterRoom(id) {
 
-  // CATACOMB LOCK RULE
+  // lock rule example
   if (state.player.location === "cat2" && id === "forest") {
     log("Path collapsed.");
     return;
@@ -198,28 +237,7 @@ function enterRoom(id) {
 
   state.player.location = id;
 
-  const room = world[id];
-
-  let html = `<h2>${room.name}</h2><p>${room.desc}</p>`;
-
-  if (room.type === "safe") {
-    html += `<button onclick="rest()">Rest</button>`;
-    if (id === "shop") html += renderShop();
-  }
-
-  if (room.type === "danger") {
-    html += `<button onclick="startFight()">Fight</button>`;
-  }
-
-  if (room.type === "boss") {
-    html += `<button onclick="startBossFight()">Boss</button>`;
-  }
-
-  room.exits.forEach(e => {
-    html += `<button onclick="enterRoom('${e}')">${world[e].name}</button>`;
-  });
-
-  document.getElementById("room").innerHTML = html;
+  renderRoom();
   updateUI();
 }
 
@@ -229,9 +247,8 @@ function enterRoom(id) {
 
 function startFight() {
 
-  const list = ["Goblin", "Skeleton", "Slime"];
-
-  const name = list[Math.floor(Math.random() * list.length)];
+  const pool = ["Goblin", "Skeleton", "Slime"];
+  const name = pool[Math.floor(Math.random() * pool.length)];
 
   const base = monsters.find(m => m.name === name);
 
@@ -283,15 +300,22 @@ function win() {
   state.inCombat = false;
   state.monster = null;
 
-  enterRoom(state.player.location);
+  renderRoom();
 }
 
-function renderFight() {
-  document.getElementById("room").innerHTML =
-    `<h2>${state.monster.name}</h2><p>HP ${state.monster.hp}</p>`;
+// =====================
+// FIGHT UI
+// =====================
 
-  document.getElementById("actions").innerHTML =
-    `<button onclick="attack()">Attack</button>`;
+function renderFight() {
+  document.getElementById("room").innerHTML = `
+    <h2>${state.monster.name}</h2>
+    <p>HP: ${state.monster.hp}</p>
+  `;
+
+  document.getElementById("actions").innerHTML = `
+    <button onclick="attack()">Attack</button>
+  `;
 }
 
 // =====================
@@ -299,6 +323,7 @@ function renderFight() {
 // =====================
 
 function renderShop() {
+
   let html = "<h3>Shop</h3>";
 
   shopItems.forEach(i => {
@@ -334,9 +359,11 @@ function updateUI() {
   const p = state.player;
 
   document.getElementById("stats").innerHTML = `
-    HP ${p.hp}/${p.maxHp}
-    Level ${p.level}
-    Gold ${p.gold}
+    HP ${p.hp}/${p.maxHp}<br>
+    Level ${p.level}<br>
+    Gold ${p.gold}<br>
+    Weapon: ${p.weapon ? p.weapon.name : "None"}<br>
+    Armor: ${p.armor ? p.armor.name : "None"}
   `;
 
   let inv = "<h3>Inventory</h3>";
@@ -348,12 +375,16 @@ function updateUI() {
   document.getElementById("inventory").innerHTML = inv;
 }
 
+// =====================
+// LOG
+// =====================
+
 function log(t) {
   document.getElementById("log").innerHTML += `<p>${t}</p>`;
 }
 
 // =====================
-// SAVE
+// SAVE / LOAD
 // =====================
 
 function saveGame() {
@@ -365,7 +396,7 @@ function loadGame() {
   state.player = Object.assign(new Player(), data);
 
   show("game");
-  enterRoom(state.player.location);
+  renderRoom();
 }
 
 // =====================
