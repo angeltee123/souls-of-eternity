@@ -1,60 +1,28 @@
-body {
-  background: #0a0a0a;
-  color: #00ff88;
-  font-family: monospace;
-  margin: 0;
-  padding: 0;
+/* --- Screen Management --- */
+.screen {
+  transition: opacity 0.3s ease;
 }
 
-.game-container {
-  max-width: 800px;
-  margin: auto;
+.hidden {
+  display: none !important;
+}
+
+/* --- Inventory Layout --- */
+#inventory {
+  background-color: var(--panel-bg);
+  border: 2px solid var(--text-primary);
   padding: 20px;
-}
-
-h1 {
-  text-align: center;
-  color: #00ff88;
-}
-
-.subtitle {
-  text-align: center;
-  color: #888;
-}
-
-#stats,
-#room,
-#log {
-  border: 2px solid #00ff88;
-  padding: 15px;
   margin-top: 20px;
-  border-radius: 10px;
+  border-radius: var(--border-radius);
 }
 
-#log {
-  height: 300px;
-  overflow-y: auto;
-  background: #111;
+#inventory ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }
 
-.actions {
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-button {
-  background: #111;
-  color: #00ff88;
-  border: 2px solid #00ff88;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #00ff88;
-  color: black;
+#inventory li {
+  padding: 4px 0;
+  border-bottom: 1px dashed var(--text-muted);
 }
