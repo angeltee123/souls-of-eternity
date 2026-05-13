@@ -447,3 +447,23 @@ function show(id) {
 
   document.getElementById(id).classList.remove("hidden");
 }
+
+// =====================
+// SERVICE WORKER
+// =====================
+
+if ("serviceWorker" in navigator) {
+
+  window.addEventListener("load", () => {
+
+    navigator.serviceWorker
+      .register("/service-worker.js")
+      .then(() => {
+        console.log("Service Worker Registered");
+      })
+      .catch(err => {
+        console.error("SW registration failed:", err);
+      });
+
+  });
+}
