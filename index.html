@@ -35,10 +35,36 @@
   <div id="log"></div>
 
   <button onclick="saveGame()">Save</button>
-
+  <button id="installBtn" style="display:none;">
+  Add to Home Screen
+</button>
 </section>
 
 <script src="game.js"></script>
+
+<script>
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+
+  deferredPrompt = e;
+
+  // Show your own install button
+  const installBtn = document.getElementById('installBtn');
+  installBtn.style.display = 'block';
+
+  installBtn.addEventListener('click', async () => {
+    deferredPrompt.prompt();
+
+    const { outcome } = await deferredPrompt.userChoice;
+
+    console.log(`User response: ${outcome}`);
+
+    deferredPrompt = null;
+  });
+});
+</script>
 
 </body>
 </html>
