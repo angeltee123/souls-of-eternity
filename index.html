@@ -44,25 +44,28 @@
 
 <script>
 let deferredPrompt;
+const installBtn = document.getElementById('installBtn');
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
 
   deferredPrompt = e;
 
-  // Show your own install button
-  const installBtn = document.getElementById('installBtn');
   installBtn.style.display = 'block';
+});
 
-  installBtn.addEventListener('click', async () => {
-    deferredPrompt.prompt();
+installBtn.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
 
-    const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt.prompt();
 
-    console.log(`User response: ${outcome}`);
+  const { outcome } = await deferredPrompt.userChoice;
 
-    deferredPrompt = null;
-  });
+  console.log(`User response: ${outcome}`);
+
+  deferredPrompt = null;
+
+  installBtn.style.display = 'none';
 });
 </script>
 
