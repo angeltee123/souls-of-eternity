@@ -1,5 +1,4 @@
 {
-  "id": "/",
   "name": "Souls of Eternity",
   "short_name": "SoE",
   "start_url": "/",
@@ -7,7 +6,6 @@
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#00ff88",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
